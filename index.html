@@ -337,7 +337,7 @@
 
     <div class="search-card">
       <div class="form-group" style="margin-bottom: 0;">
-        <label for="searchInput">কোড নম্বর দিয়ে খুঁজুন</label>
+        <label for="searchInput">কোড নম্বর দিয়ে খুঁজুন</label>
         <input type="text" id="searchInput" class="form-control" placeholder="যেমন: KM Ismail অথবা 101">
       </div>
     </div>
@@ -405,7 +405,7 @@
   </div>
 
   <script>
-    // 💥 এই জায়গায় আপনার ফায়ারবেস কনফিগারেশনটি বসাবেন
+    // 💥 এই জায়গায় আপনার ফায়ারবেস কনফিগারেশনটি বসাবেন
     const firebaseConfig = {
       apiKey: "AIzaSyC3Yj7t3skior-N5wvyI5nUPKvACcqqyMc",
       authDomain: "red-lock-bangladesh.firebaseapp.com",
@@ -456,19 +456,20 @@
 
       const renderCards = (list) => {
         if (!list || list.length === 0) {
-          results.innerHTML = `<div class="empty-state">কোনো প্লেয়ার তথ্য পাওয়া যায়নি</div>`;
+          results.innerHTML = `<div class="empty-state">কোনো প্লেয়ার তথ্য পাওয়া যায়নি</div>`;
           return;
         }
 
         results.innerHTML = list.map(s => {
-          const stats = s.stats || {
-            pace: { total: 91, acc: 94, speed: 89 },
-            shooting: { total: 63, finish: 53, longShot: 72, shotPow: 86, positioning: 58, volley: 55, penalties: 42 },
-            passing: { total: 78, shortPass: 90, longPass: 89, vision: 77, crossing: 60, curve: 57, freeKick: 52 },
-            dribbling: { total: 89, dribbling: 82, ballControl: 93, agility: 88, reactions: 95 },
-            defending: { total: 105, marking: 107, standingTackle: 108, slidingTackle: 100, awareness: 107 },
-            physical: { total: 106, strength: 107, aggression: 100, jumping: 114 }
-          };
+          const stats = s.stats || {};
+
+          // ছবি অনুযায়ী সকল ডিফল্ট স্ট্যাটস (ডাটা না থাকলেও অ্যাপ যেন না ভাঙে)
+          const pace = stats.pace || { total: 91, acc: 94, speed: 89 };
+          const shooting = stats.shooting || { total: 63, finish: 53, longShot: 72, shotPow: 86, positioning: 58, volley: 55, penalties: 42 };
+          const passing = stats.passing || { total: 78, shortPass: 90, longPass: 89, vision: 77, crossing: 60, curve: 57, freeKick: 52 };
+          const dribbling = stats.dribbling || { total: 89, dribbling: 82, ballControl: 93, agility: 88, reactions: 95 };
+          const defending = stats.defending || { total: 105, marking: 107, standingTackle: 108, slidingTackle: 100, awareness: 107 };
+          const physical = stats.physical || { total: 106, strength: 107, aggression: 100, jumping: 114 };
 
           return `
             <div class="fc-card">
@@ -493,47 +494,52 @@
 
               <div class="attributes-grid">
                 <div class="attr-box">
-                  <div class="attr-header"><span class="attr-title">Pace</span><span class="attr-score">${stats.pace.total}</span></div>
-                  <div class="attr-item"><span>Acceleration</span><span class="val">${stats.pace.acc}</span></div>
-                  <div class="attr-item"><span>Sprint Speed</span><span class="val">${stats.pace.speed}</span></div>
+                  <div class="attr-header"><span class="attr-title">Pace</span><span class="attr-score">${pace.total ?? 91}</span></div>
+                  <div class="attr-item"><span>Acceleration</span><span class="val">${pace.acc ?? 94}</span></div>
+                  <div class="attr-item"><span>Sprint Speed</span><span class="val">${pace.speed ?? 89}</span></div>
                 </div>
+
                 <div class="attr-box">
-                  <div class="attr-header"><span class="attr-title">Shooting</span><span class="attr-score">${stats.shooting.total}</span></div>
-                  <div class="attr-item"><span>Finishing</span><span class="val">${stats.shooting.finish}</span></div>
-                  <div class="attr-item"><span>Long Shot</span><span class="val">${stats.shooting.longShot}</span></div>
-                  <div class="attr-item"><span>Shot Power</span><span class="val">${stats.shooting.shotPow}</span></div>
-                  <div class="attr-item"><span>Positioning</span><span class="val">${stats.shooting.positioning}</span></div>
-                  <div class="attr-item"><span>Volley</span><span class="val">${stats.shooting.volley}</span></div>
-                  <div class="attr-item"><span>Penalties</span><span class="val">${stats.shooting.penalties}</span></div>
+                  <div class="attr-header"><span class="attr-title">Shooting</span><span class="attr-score">${shooting.total ?? 63}</span></div>
+                  <div class="attr-item"><span>Finishing</span><span class="val">${shooting.finish ?? 53}</span></div>
+                  <div class="attr-item"><span>Long Shot</span><span class="val">${shooting.longShot ?? 72}</span></div>
+                  <div class="attr-item"><span>Shot Power</span><span class="val">${shooting.shotPow ?? 86}</span></div>
+                  <div class="attr-item"><span>Positioning</span><span class="val">${shooting.positioning ?? 58}</span></div>
+                  <div class="attr-item"><span>Volley</span><span class="val">${shooting.volley ?? 55}</span></div>
+                  <div class="attr-item"><span>Penalties</span><span class="val">${shooting.penalties ?? 42}</span></div>
                 </div>
+
                 <div class="attr-box">
-                  <div class="attr-header"><span class="attr-title">Passing</span><span class="attr-score">${stats.passing.total}</span></div>
-                  <div class="attr-item"><span>Short Passing</span><span class="val">${stats.passing.shortPass}</span></div>
-                  <div class="attr-item"><span>Long Passing</span><span class="val">${stats.passing.longPass}</span></div>
-                  <div class="attr-item"><span>Vision</span><span class="val">${stats.passing.vision}</span></div>
-                  <div class="attr-item"><span>Crossing</span><span class="val">${stats.passing.crossing}</span></div>
-                  <div class="attr-item"><span>Curve</span><span class="val">${stats.passing.curve}</span></div>
-                  <div class="attr-item"><span>Free Kick</span><span class="val">${stats.passing.freeKick}</span></div>
+                  <div class="attr-header"><span class="attr-title">Passing</span><span class="attr-score">${passing.total ?? 78}</span></div>
+                  <div class="attr-item"><span>Short Passing</span><span class="val">${passing.shortPass ?? 90}</span></div>
+                  <div class="attr-item"><span>Long Passing</span><span class="val">${passing.longPass ?? 89}</span></div>
+                  <div class="attr-item"><span>Vision</span><span class="val">${passing.vision ?? 77}</span></div>
+                  <div class="attr-item"><span>Crossing</span><span class="val">${passing.crossing ?? 60}</span></div>
+                  <div class="attr-item"><span>Curve</span><span class="val">${passing.curve ?? 57}</span></div>
+                  <div class="attr-item"><span>Free Kick</span><span class="val">${passing.freeKick ?? 52}</span></div>
                 </div>
+
                 <div class="attr-box">
-                  <div class="attr-header"><span class="attr-title">Dribbling</span><span class="attr-score">${stats.dribbling.total}</span></div>
-                  <div class="attr-item"><span>Dribbling</span><span class="val">${stats.dribbling.dribbling}</span></div>
-                  <div class="attr-item"><span>Ball Control</span><span class="val">${stats.dribbling.ballControl}</span></div>
-                  <div class="attr-item"><span>Agility</span><span class="val">${stats.dribbling.agility}</span></div>
-                  <div class="attr-item"><span>Reactions</span><span class="val">${stats.dribbling.reactions}</span></div>
+                  <div class="attr-header"><span class="attr-title">Dribbling</span><span class="attr-score">${dribbling.total ?? 89}</span></div>
+                  <div class="attr-item"><span>Dribbling</span><span class="val">${dribbling.dribbling ?? 82}</span></div>
+                  <div class="attr-item"><span>Ball Control</span><span class="val">${dribbling.ballControl ?? 93}</span></div>
+                  <div class="attr-item"><span>Agility</span><span class="val">${dribbling.agility ?? 88}</span></div>
+                  <div class="attr-item"><span>Reactions</span><span class="val">${dribbling.reactions ?? 95}</span></div>
                 </div>
+
                 <div class="attr-box">
-                  <div class="attr-header"><span class="attr-title">Defending</span><span class="attr-score">${stats.defending.total}</span></div>
-                  <div class="attr-item"><span>Marking</span><span class="val">${stats.defending.marking}</span></div>
-                  <div class="attr-item"><span>Standing Tackle</span><span class="val">${stats.defending.standingTackle}</span></div>
-                  <div class="attr-item"><span>Sliding Tackle</span><span class="val">${stats.defending.slidingTackle}</span></div>
-                  <div class="attr-item"><span>Awareness</span><span class="val">${stats.defending.awareness}</span></div>
+                  <div class="attr-header"><span class="attr-title">Defending</span><span class="attr-score">${defending.total ?? 105}</span></div>
+                  <div class="attr-item"><span>Marking</span><span class="val">${defending.marking ?? 107}</span></div>
+                  <div class="attr-item"><span>Standing Tackle</span><span class="val">${defending.standingTackle ?? 108}</span></div>
+                  <div class="attr-item"><span>Sliding Tackle</span><span class="val">${defending.slidingTackle ?? 100}</span></div>
+                  <div class="attr-item"><span>Awareness</span><span class="val">${defending.awareness ?? 107}</span></div>
                 </div>
+
                 <div class="attr-box">
-                  <div class="attr-header"><span class="attr-title">Physical</span><span class="attr-score">${stats.physical.total}</span></div>
-                  <div class="attr-item"><span>Strength</span><span class="val">${stats.physical.strength}</span></div>
-                  <div class="attr-item"><span>Aggression</span><span class="val">${stats.physical.aggression}</span></div>
-                  <div class="attr-item"><span>Jumping</span><span class="val">${stats.physical.jumping}</span></div>
+                  <div class="attr-header"><span class="attr-title">Physical</span><span class="attr-score">${physical.total ?? 106}</span></div>
+                  <div class="attr-item"><span>Strength</span><span class="val">${physical.strength ?? 107}</span></div>
+                  <div class="attr-item"><span>Aggression</span><span class="val">${physical.aggression ?? 100}</span></div>
+                  <div class="attr-item"><span>Jumping</span><span class="val">${physical.jumping ?? 114}</span></div>
                 </div>
               </div>
 
@@ -572,7 +578,7 @@
           const pass = document.getElementById("loginPass").value;
 
           if (pass !== "1234") {
-            alert("ভুল পাসওয়ার্ড!");
+            alert("ভুল পাসওয়ার্ড!");
             return;
           }
 
@@ -585,7 +591,7 @@
           } else {
             const student = students.find(s => String(s.roll) === id);
             if (!student) {
-              alert("এই কোড নম্বর দিয়ে কোনো প্লেয়ার এর নাম পাওয়া যায়নি!");
+              alert("এই কোড নম্বর দিয়ে কোনো প্লেয়ার এর নাম পাওয়া যায়নি!");
               return;
             }
             currentUser = { role: "user", name: student.name, roll: student.roll };
@@ -644,7 +650,7 @@
               closeModal();
             })
             .catch((err) => {
-              alert("ডাটা সেভ করতে সমস্য হয়েছে: " + err.message);
+              alert("ডাটা সেভ করতে সমস্য হয়েছে: " + err.message);
             });
         });
       };
