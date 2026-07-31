@@ -337,7 +337,7 @@
 
     <div class="search-card">
       <div class="form-group" style="margin-bottom: 0;">
-        <label for="searchInput">কোড নম্বর দিয়ে খুঁজুন</label>
+        <label for="searchInput">কোড নম্বর দিয়ে খুঁজুন</label>
         <input type="text" id="searchInput" class="form-control" placeholder="যেমন: KM Ismail অথবা 101">
       </div>
     </div>
@@ -405,7 +405,7 @@
   </div>
 
   <script>
-    // 💥 এই জায়গায় আপনার ফায়ারবেস কনফিগারেশনটি বসাবেন
+    // 💥 এই জায়গায় আপনার ফায়ারবেস কনফিগারেশনটি বসাবেন
     const firebaseConfig = {
       apiKey: "AIzaSyC3Yj7t3skior-N5wvyI5nUPKvACcqqyMc",
       authDomain: "red-lock-bangladesh.firebaseapp.com",
@@ -450,7 +450,7 @@
           }
         }, (error) => {
           console.error("Firestore Error: ", error);
-          results.innerHTML = `<div class="empty-state">ডাটা পেতে সমস্যা হয়েছে! আবার পরীক্ষা করুন।</div>`;
+          results.innerHTML = `<div class="empty-state">ডাটা পেতে সমস্যা হয়েছে! আবার পরীক্ষা করুন।</div>`;
         });
       };
 
@@ -471,19 +471,19 @@
             <div class="fc-card">
               <div class="fc-header">
                 <div class="fut-badge">
-                  <div class="fut-ovr">${s.ovr}</div>
-                  <div class="fut-pos">${s.pos}</div>
+                  <div class="fut-ovr">${s.ovr || '-'}</div>
+                  <div class="fut-pos">${s.pos || '-'}</div>
                 </div>
                 <div class="player-details">
-                  <h2>${s.name}</h2>
+                  <h2>${s.name || 'N/A'}</h2>
                   <div class="player-meta">
-                    <span>Code No.: <strong>${s.roll}</strong></span>
-                    <span>Class: <strong>${s.class} (${s.section})</strong></span>
-                    <span>Department: <strong>${s.dept}</strong></span>
-                    <span>Age: <strong>${s.age}</strong></span>
-                    <span>Date of Birth: <strong>${s.dob}</strong></span>
-                    <span>Strong Foot: <strong>${s.strongFoot}</strong></span>
-                    <span>Mobile: <strong>${s.phone}</strong></span>
+                    <span>Code No.: <strong>${s.roll || 'N/A'}</strong></span>
+                    <span>Class: <strong>${s.class || 'N/A'} (${s.section || ''})</strong></span>
+                    <span>Department: <strong>${s.dept || 'N/A'}</strong></span>
+                    <span>Age: <strong>${s.age || 'N/A'}</strong></span>
+                    <span>Date of Birth: <strong>${s.dob || 'N/A'}</strong></span>
+                    <span>Strong Foot: <strong>${s.strongFoot || 'N/A'}</strong></span>
+                    <span>Mobile: <strong>${s.phone || 'N/A'}</strong></span>
                   </div>
                 </div>
               </div>
@@ -554,7 +554,7 @@
           } else {
             const student = students.find(s => String(s.roll) === id);
             if (!student) {
-              alert("এই কোড নম্বর দিয়ে কোনো প্লেয়ার এর নাম পাওয়া যায়নি!");
+              alert("এই কোড নম্বর দিয়ে কোনো প্লেয়ার এর নাম পাওয়া যায়নি!");
               return;
             }
             currentUser = { role: "user", name: student.name, roll: student.roll };
@@ -567,7 +567,7 @@
         searchInput.addEventListener("input", () => {
           const query = searchInput.value.trim().toLowerCase();
           const filtered = students.filter(s =>
-            s.name.toLowerCase().includes(query) || String(s.roll).includes(query)
+            (s.name && s.name.toLowerCase().includes(query)) || String(s.roll).includes(query)
           );
           renderCards(filtered);
         });
@@ -576,6 +576,9 @@
           e.preventDefault();
           const code = document.getElementById("formRoll").value.trim();
           const name = document.getElementById("formName").value.trim();
+          const dob = document.getElementById("formDob").value.trim();
+          const age = document.getElementById("formAge").value.trim();
+          const strongFoot = document.getElementById("formStrongFoot").value.trim();
           const ovr = document.getElementById("formOvr").value;
           const pos = document.getElementById("formPos").value.trim();
           const Class = document.getElementById("formClass").value.trim();
@@ -586,6 +589,9 @@
           const studentData = {
             roll: code,
             name,
+            dob,
+            age,
+            strongFoot,
             ovr,
             pos,
             class: Class,
@@ -604,7 +610,7 @@
               closeModal();
             })
             .catch((err) => {
-              alert("ডাটা সেভ করতে সমস্য হয়েছে: " + err.message);
+              alert("ডাটা সেভ করতে সমস্য হয়েছে: " + err.message);
             });
         });
       };
@@ -625,15 +631,18 @@
         if (!student) return;
 
         document.getElementById("modalTitle").innerText = "তথ্য এডিট করুন";
-        document.getElementById("formRoll").value = student.roll;
+        document.getElementById("formRoll").value = student.roll || '';
         document.getElementById("formRoll").disabled = true;
-        document.getElementById("formName").value = student.name;
-        document.getElementById("formOvr").value = student.ovr;
-        document.getElementById("formPos").value = student.pos;
-        document.getElementById("formClass").value = student.class;
-        document.getElementById("formSection").value = student.section;
-        document.getElementById("formDept").value = student.dept;
-        document.getElementById("formPhone").value = student.phone;
+        document.getElementById("formName").value = student.name || '';
+        document.getElementById("formDob").value = student.dob || '';
+        document.getElementById("formAge").value = student.age || '';
+        document.getElementById("formStrongFoot").value = student.strongFoot || '';
+        document.getElementById("formOvr").value = student.ovr || '';
+        document.getElementById("formPos").value = student.pos || '';
+        document.getElementById("formClass").value = student.class || '';
+        document.getElementById("formSection").value = student.section || '';
+        document.getElementById("formDept").value = student.dept || '';
+        document.getElementById("formPhone").value = student.phone || '';
 
         studentModal.style.display = "flex";
       };
@@ -641,14 +650,14 @@
       const deleteStudent = (roll) => {
         if (confirm("আপনি কি নিশ্চিত যে এই তথ্যটি মুছে ফেলবেন?")) {
           db.collection("students").doc(String(roll)).delete()
-            .catch((err) => alert("ডিলিট করার সময় সমস্যা হয়েছে: " + err.message));
+            .catch((err) => alert("ডিলিট করার সময় সমস্যা হয়েছে: " + err.message));
         }
       };
 
       const showProfile = () => {
         if (!currentUser) return;
         if (currentUser.role === 'admin') {
-          alert("এডমিন প্রোফাইল সক্রিয়: আপনার সম্পূর্ণ পোর্টালে এক্সেস আছে।");
+          alert("এডমিন প্রোফাইল সক্রিয়: আপনার সম্পূর্ণ পোর্টালে এক্সেস আছে।");
         } else {
           searchInput.value = "";
           const myProfile = students.filter(s => String(s.roll) === String(currentUser.roll));
