@@ -411,8 +411,13 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    // Helper Function: ডাটাবেসে মান ০ বা না থাকলেও যেন আসল কার্ডের সংখ্যা দেখায়
-    const getVal = (val, fallback) => (val && val !== 0 && val !== "0") ? val : fallback;
+    // 🔴 মান শূন্য (0) বা খালি থাকলে এটি স্বয়ংক্রিয়ভাবে ছবির আসল মানগুলো ব্যবহার করবে
+    const parseStat = (val, defaultValue) => {
+      if (val === undefined || val === null || val === 0 || val === '0' || val === '') {
+        return defaultValue;
+      }
+      return val;
+    };
 
     const App = (() => {
       let students = [];
@@ -465,7 +470,7 @@
             <div class="fc-card">
               <div class="fc-header">
                 <div class="fut-badge">
-                  <div class="fut-ovr">${s.ovr || '85'}</div>
+                  <div class="fut-ovr">${parseStat(s.ovr, 85)}</div>
                   <div class="fut-pos">${s.pos || 'CB'}</div>
                 </div>
                 <div class="player-details">
@@ -484,52 +489,52 @@
 
               <div class="attributes-grid">
                 <div class="attr-box">
-                  <div class="attr-header"><span class="attr-title">Pace</span><span class="attr-score">${getVal(p.total, 91)}</span></div>
-                  <div class="attr-item"><span>Acceleration</span><span class="val">${getVal(p.acc, 94)}</span></div>
-                  <div class="attr-item"><span>Sprint Speed</span><span class="val">${getVal(p.speed, 89)}</span></div>
+                  <div class="attr-header"><span class="attr-title">Pace</span><span class="attr-score">${parseStat(p.total, 91)}</span></div>
+                  <div class="attr-item"><span>Acceleration</span><span class="val">${parseStat(p.acc, 94)}</span></div>
+                  <div class="attr-item"><span>Sprint Speed</span><span class="val">${parseStat(p.speed, 89)}</span></div>
                 </div>
 
                 <div class="attr-box">
-                  <div class="attr-header"><span class="attr-title">Shooting</span><span class="attr-score">${getVal(sh.total, 63)}</span></div>
-                  <div class="attr-item"><span>Finishing</span><span class="val">${getVal(sh.finish, 53)}</span></div>
-                  <div class="attr-item"><span>Long Shot</span><span class="val">${getVal(sh.longShot, 72)}</span></div>
-                  <div class="attr-item"><span>Shot Power</span><span class="val">${getVal(sh.shotPow, 86)}</span></div>
-                  <div class="attr-item"><span>Positioning</span><span class="val">${getVal(sh.positioning, 58)}</span></div>
-                  <div class="attr-item"><span>Volley</span><span class="val">${getVal(sh.volley, 55)}</span></div>
-                  <div class="attr-item"><span>Penalties</span><span class="val">${getVal(sh.penalties, 42)}</span></div>
+                  <div class="attr-header"><span class="attr-title">Shooting</span><span class="attr-score">${parseStat(sh.total, 63)}</span></div>
+                  <div class="attr-item"><span>Finishing</span><span class="val">${parseStat(sh.finish, 53)}</span></div>
+                  <div class="attr-item"><span>Long Shot</span><span class="val">${parseStat(sh.longShot, 72)}</span></div>
+                  <div class="attr-item"><span>Shot Power</span><span class="val">${parseStat(sh.shotPow, 86)}</span></div>
+                  <div class="attr-item"><span>Positioning</span><span class="val">${parseStat(sh.positioning, 58)}</span></div>
+                  <div class="attr-item"><span>Volley</span><span class="val">${parseStat(sh.volley, 55)}</span></div>
+                  <div class="attr-item"><span>Penalties</span><span class="val">${parseStat(sh.penalties, 42)}</span></div>
                 </div>
 
                 <div class="attr-box">
-                  <div class="attr-header"><span class="attr-title">Passing</span><span class="attr-score">${getVal(pas.total, 78)}</span></div>
-                  <div class="attr-item"><span>Short Passing</span><span class="val">${getVal(pas.shortPass, 90)}</span></div>
-                  <div class="attr-item"><span>Long Passing</span><span class="val">${getVal(pas.longPass, 89)}</span></div>
-                  <div class="attr-item"><span>Vision</span><span class="val">${getVal(pas.vision, 77)}</span></div>
-                  <div class="attr-item"><span>Crossing</span><span class="val">${getVal(pas.crossing, 60)}</span></div>
-                  <div class="attr-item"><span>Curve</span><span class="val">${getVal(pas.curve, 57)}</span></div>
-                  <div class="attr-item"><span>Free Kick</span><span class="val">${getVal(pas.freeKick, 52)}</span></div>
+                  <div class="attr-header"><span class="attr-title">Passing</span><span class="attr-score">${parseStat(pas.total, 78)}</span></div>
+                  <div class="attr-item"><span>Short Passing</span><span class="val">${parseStat(pas.shortPass, 90)}</span></div>
+                  <div class="attr-item"><span>Long Passing</span><span class="val">${parseStat(pas.longPass, 89)}</span></div>
+                  <div class="attr-item"><span>Vision</span><span class="val">${parseStat(pas.vision, 77)}</span></div>
+                  <div class="attr-item"><span>Crossing</span><span class="val">${parseStat(pas.crossing, 60)}</span></div>
+                  <div class="attr-item"><span>Curve</span><span class="val">${parseStat(pas.curve, 57)}</span></div>
+                  <div class="attr-item"><span>Free Kick</span><span class="val">${parseStat(pas.freeKick, 52)}</span></div>
                 </div>
 
                 <div class="attr-box">
-                  <div class="attr-header"><span class="attr-title">Dribbling</span><span class="attr-score">${getVal(dr.total, 89)}</span></div>
-                  <div class="attr-item"><span>Dribbling</span><span class="val">${getVal(dr.dribbling, 82)}</span></div>
-                  <div class="attr-item"><span>Ball Control</span><span class="val">${getVal(dr.ballControl, 93)}</span></div>
-                  <div class="attr-item"><span>Agility</span><span class="val">${getVal(dr.agility, 88)}</span></div>
-                  <div class="attr-item"><span>Reactions</span><span class="val">${getVal(dr.reactions, 95)}</span></div>
+                  <div class="attr-header"><span class="attr-title">Dribbling</span><span class="attr-score">${parseStat(dr.total, 89)}</span></div>
+                  <div class="attr-item"><span>Dribbling</span><span class="val">${parseStat(dr.dribbling, 82)}</span></div>
+                  <div class="attr-item"><span>Ball Control</span><span class="val">${parseStat(dr.ballControl, 93)}</span></div>
+                  <div class="attr-item"><span>Agility</span><span class="val">${parseStat(dr.agility, 88)}</span></div>
+                  <div class="attr-item"><span>Reactions</span><span class="val">${parseStat(dr.reactions, 95)}</span></div>
                 </div>
 
                 <div class="attr-box">
-                  <div class="attr-header"><span class="attr-title">Defending</span><span class="attr-score">${getVal(def.total, 105)}</span></div>
-                  <div class="attr-item"><span>Marking</span><span class="val">${getVal(def.marking, 107)}</span></div>
-                  <div class="attr-item"><span>Standing Tackle</span><span class="val">${getVal(def.standingTackle, 108)}</span></div>
-                  <div class="attr-item"><span>Sliding Tackle</span><span class="val">${getVal(def.slidingTackle, 100)}</span></div>
-                  <div class="attr-item"><span>Awareness</span><span class="val">${getVal(def.awareness, 107)}</span></div>
+                  <div class="attr-header"><span class="attr-title">Defending</span><span class="attr-score">${parseStat(def.total, 105)}</span></div>
+                  <div class="attr-item"><span>Marking</span><span class="val">${parseStat(def.marking, 107)}</span></div>
+                  <div class="attr-item"><span>Standing Tackle</span><span class="val">${parseStat(def.standingTackle, 108)}</span></div>
+                  <div class="attr-item"><span>Sliding Tackle</span><span class="val">${parseStat(def.slidingTackle, 100)}</span></div>
+                  <div class="attr-item"><span>Awareness</span><span class="val">${parseStat(def.awareness, 107)}</span></div>
                 </div>
 
                 <div class="attr-box">
-                  <div class="attr-header"><span class="attr-title">Physical</span><span class="attr-score">${getVal(phy.total, 106)}</span></div>
-                  <div class="attr-item"><span>Strength</span><span class="val">${getVal(phy.strength, 107)}</span></div>
-                  <div class="attr-item"><span>Aggression</span><span class="val">${getVal(phy.aggression, 100)}</span></div>
-                  <div class="attr-item"><span>Jumping</span><span class="val">${getVal(phy.jumping, 114)}</span></div>
+                  <div class="attr-header"><span class="attr-title">Physical</span><span class="attr-score">${parseStat(phy.total, 106)}</span></div>
+                  <div class="attr-item"><span>Strength</span><span class="val">${parseStat(phy.strength, 107)}</span></div>
+                  <div class="attr-item"><span>Aggression</span><span class="val">${parseStat(phy.aggression, 100)}</span></div>
+                  <div class="attr-item"><span>Jumping</span><span class="val">${parseStat(phy.jumping, 114)}</span></div>
                 </div>
               </div>
 
@@ -606,13 +611,14 @@
           const dob = document.getElementById("formDob").value.trim();
           const age = document.getElementById("formAge").value.trim();
           const strongFoot = document.getElementById("formStrongFoot").value.trim();
-          const ovr = document.getElementById("formOvr").value;
+          const ovr = parseInt(document.getElementById("formOvr").value) || 85;
           const pos = document.getElementById("formPos").value.trim();
           const Class = document.getElementById("formClass").value.trim();
           const section = document.getElementById("formSection").value.trim();
           const dept = document.getElementById("formDept").value.trim();
           const phone = document.getElementById("formPhone").value.trim();
 
+          // ডাটা সেভ করার সময় আসল মানগুলোসহ ডাটাবেসে সেভ হবে
           const studentData = {
             roll: code,
             name,
@@ -637,7 +643,7 @@
 
           db.collection("students").doc(String(code)).set(studentData, { merge: true })
             .then(() => closeModal())
-            .catch((err) => alert("ডাটা সেভ করতে সমস্য হয়েছে: " + err.message));
+            .catch((err) => alert("ডাটা সেভ করতে সমস্যা হয়েছে: " + err.message));
         });
       };
 
