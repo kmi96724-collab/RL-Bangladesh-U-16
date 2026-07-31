@@ -38,7 +38,6 @@
       line-height: 1.5;
     }
 
-    /* Header Section */
     header {
       background: linear-gradient(180deg, var(--primary-color) 0%, rgba(10, 12, 16, 0.95) 100%);
       padding: 30px 16px;
@@ -61,14 +60,12 @@
       opacity: 0.85;
     }
 
-    /* Main Container */
     .container {
       max-width: 900px;
       margin: 0 auto;
       padding: 24px 16px;
     }
 
-    /* Navigation Bar */
     .nav-bar {
       background: var(--card-bg);
       border: 1px solid var(--border-color);
@@ -82,10 +79,8 @@
     }
 
     .user-badge strong { color: var(--gold-color); }
-
     .btn-group { display: flex; gap: 10px; flex-wrap: wrap; }
 
-    /* Buttons */
     .btn {
       background: var(--primary-color);
       color: #ffffff;
@@ -105,7 +100,6 @@
     .btn-danger { background: var(--danger-color); }
     .btn-danger:hover { background: var(--danger-hover); }
 
-    /* Auth Section */
     .auth-card {
       background: var(--card-bg);
       border: 1px solid var(--border-color);
@@ -137,7 +131,6 @@
       box-shadow: 0 0 0 2px rgba(139, 0, 0, 0.3);
     }
 
-    /* Cards */
     .search-card {
       background: var(--card-bg);
       border: 1px solid var(--border-color);
@@ -317,7 +310,7 @@
         </div>
         <div class="form-group">
           <label for="loginPass">পাসওয়ার্ড</label>
-          <input type="password" id="loginPass" class="form-control" placeholder="পাসওয়ার্ড দিন " required>
+          <input type="password" id="loginPass" class="form-control" placeholder="পাসওয়ার্ড দিন" required>
         </div>
         <button type="submit" class="btn" style="width: 100%;">প্রবেশ করুন</button>
       </form>
@@ -405,7 +398,6 @@
   </div>
 
   <script>
-    // 💥 এই জায়গায় আপনার ফায়ারবেস কনফিগারেশনটি বসাবেন
     const firebaseConfig = {
       apiKey: "AIzaSyC3Yj7t3skior-N5wvyI5nUPKvACcqqyMc",
       authDomain: "red-lock-bangladesh.firebaseapp.com",
@@ -416,14 +408,15 @@
       measurementId: "G-QTQ67SZ3C2"
     };
 
-    // Firebase Initialize
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
+
+    // Helper Function: ডাটাবেসে মান ০ বা না থাকলেও যেন আসল কার্ডের সংখ্যা দেখায়
+    const getVal = (val, fallback) => (val && val !== 0 && val !== "0") ? val : fallback;
 
     const App = (() => {
       let students = [];
       let currentUser = JSON.parse(localStorage.getItem('redlock_user')) || null;
-      let isEditMode = false;
 
       const authSection = document.getElementById("authSection");
       const appSection = document.getElementById("appSection");
@@ -435,7 +428,6 @@
       const studentModal = document.getElementById("studentModal");
       const studentForm = document.getElementById("studentForm");
 
-      // Firebase Realtime Listener
       const listenToFirebase = () => {
         results.innerHTML = `<div class="empty-state">ডাটা লোড হচ্ছে...</div>`;
         
@@ -450,7 +442,7 @@
           }
         }, (error) => {
           console.error("Firestore Error: ", error);
-          results.innerHTML = `<div class="empty-state">ডাটা পেতে সমস্যা হয়েছে! আবার পরীক্ষা করুন।</div>`;
+          results.innerHTML = `<div class="empty-state">ডাটা পেতে সমস্যা হয়েছে!</div>`;
         });
       };
 
@@ -461,22 +453,20 @@
         }
 
         results.innerHTML = list.map(s => {
-          const stats = s.stats || {};
-
-          // ছবি অনুযায়ী সকল ডিফল্ট স্ট্যাটস (ডাটা না থাকলেও অ্যাপ যেন না ভাঙে)
-          const pace = stats.pace || { total: 91, acc: 94, speed: 89 };
-          const shooting = stats.shooting || { total: 63, finish: 53, longShot: 72, shotPow: 86, positioning: 58, volley: 55, penalties: 42 };
-          const passing = stats.passing || { total: 78, shortPass: 90, longPass: 89, vision: 77, crossing: 60, curve: 57, freeKick: 52 };
-          const dribbling = stats.dribbling || { total: 89, dribbling: 82, ballControl: 93, agility: 88, reactions: 95 };
-          const defending = stats.defending || { total: 105, marking: 107, standingTackle: 108, slidingTackle: 100, awareness: 107 };
-          const physical = stats.physical || { total: 106, strength: 107, aggression: 100, jumping: 114 };
+          const st = s.stats || {};
+          const p = st.pace || {};
+          const sh = st.shooting || {};
+          const pas = st.passing || {};
+          const dr = st.dribbling || {};
+          const def = st.defending || {};
+          const phy = st.physical || {};
 
           return `
             <div class="fc-card">
               <div class="fc-header">
                 <div class="fut-badge">
-                  <div class="fut-ovr">${s.ovr || '-'}</div>
-                  <div class="fut-pos">${s.pos || '-'}</div>
+                  <div class="fut-ovr">${s.ovr || '85'}</div>
+                  <div class="fut-pos">${s.pos || 'CB'}</div>
                 </div>
                 <div class="player-details">
                   <h2>${s.name || 'N/A'}</h2>
@@ -494,52 +484,52 @@
 
               <div class="attributes-grid">
                 <div class="attr-box">
-                  <div class="attr-header"><span class="attr-title">Pace</span><span class="attr-score">${pace.total ?? 91}</span></div>
-                  <div class="attr-item"><span>Acceleration</span><span class="val">${pace.acc ?? 94}</span></div>
-                  <div class="attr-item"><span>Sprint Speed</span><span class="val">${pace.speed ?? 89}</span></div>
+                  <div class="attr-header"><span class="attr-title">Pace</span><span class="attr-score">${getVal(p.total, 91)}</span></div>
+                  <div class="attr-item"><span>Acceleration</span><span class="val">${getVal(p.acc, 94)}</span></div>
+                  <div class="attr-item"><span>Sprint Speed</span><span class="val">${getVal(p.speed, 89)}</span></div>
                 </div>
 
                 <div class="attr-box">
-                  <div class="attr-header"><span class="attr-title">Shooting</span><span class="attr-score">${shooting.total ?? 63}</span></div>
-                  <div class="attr-item"><span>Finishing</span><span class="val">${shooting.finish ?? 53}</span></div>
-                  <div class="attr-item"><span>Long Shot</span><span class="val">${shooting.longShot ?? 72}</span></div>
-                  <div class="attr-item"><span>Shot Power</span><span class="val">${shooting.shotPow ?? 86}</span></div>
-                  <div class="attr-item"><span>Positioning</span><span class="val">${shooting.positioning ?? 58}</span></div>
-                  <div class="attr-item"><span>Volley</span><span class="val">${shooting.volley ?? 55}</span></div>
-                  <div class="attr-item"><span>Penalties</span><span class="val">${shooting.penalties ?? 42}</span></div>
+                  <div class="attr-header"><span class="attr-title">Shooting</span><span class="attr-score">${getVal(sh.total, 63)}</span></div>
+                  <div class="attr-item"><span>Finishing</span><span class="val">${getVal(sh.finish, 53)}</span></div>
+                  <div class="attr-item"><span>Long Shot</span><span class="val">${getVal(sh.longShot, 72)}</span></div>
+                  <div class="attr-item"><span>Shot Power</span><span class="val">${getVal(sh.shotPow, 86)}</span></div>
+                  <div class="attr-item"><span>Positioning</span><span class="val">${getVal(sh.positioning, 58)}</span></div>
+                  <div class="attr-item"><span>Volley</span><span class="val">${getVal(sh.volley, 55)}</span></div>
+                  <div class="attr-item"><span>Penalties</span><span class="val">${getVal(sh.penalties, 42)}</span></div>
                 </div>
 
                 <div class="attr-box">
-                  <div class="attr-header"><span class="attr-title">Passing</span><span class="attr-score">${passing.total ?? 78}</span></div>
-                  <div class="attr-item"><span>Short Passing</span><span class="val">${passing.shortPass ?? 90}</span></div>
-                  <div class="attr-item"><span>Long Passing</span><span class="val">${passing.longPass ?? 89}</span></div>
-                  <div class="attr-item"><span>Vision</span><span class="val">${passing.vision ?? 77}</span></div>
-                  <div class="attr-item"><span>Crossing</span><span class="val">${passing.crossing ?? 60}</span></div>
-                  <div class="attr-item"><span>Curve</span><span class="val">${passing.curve ?? 57}</span></div>
-                  <div class="attr-item"><span>Free Kick</span><span class="val">${passing.freeKick ?? 52}</span></div>
+                  <div class="attr-header"><span class="attr-title">Passing</span><span class="attr-score">${getVal(pas.total, 78)}</span></div>
+                  <div class="attr-item"><span>Short Passing</span><span class="val">${getVal(pas.shortPass, 90)}</span></div>
+                  <div class="attr-item"><span>Long Passing</span><span class="val">${getVal(pas.longPass, 89)}</span></div>
+                  <div class="attr-item"><span>Vision</span><span class="val">${getVal(pas.vision, 77)}</span></div>
+                  <div class="attr-item"><span>Crossing</span><span class="val">${getVal(pas.crossing, 60)}</span></div>
+                  <div class="attr-item"><span>Curve</span><span class="val">${getVal(pas.curve, 57)}</span></div>
+                  <div class="attr-item"><span>Free Kick</span><span class="val">${getVal(pas.freeKick, 52)}</span></div>
                 </div>
 
                 <div class="attr-box">
-                  <div class="attr-header"><span class="attr-title">Dribbling</span><span class="attr-score">${dribbling.total ?? 89}</span></div>
-                  <div class="attr-item"><span>Dribbling</span><span class="val">${dribbling.dribbling ?? 82}</span></div>
-                  <div class="attr-item"><span>Ball Control</span><span class="val">${dribbling.ballControl ?? 93}</span></div>
-                  <div class="attr-item"><span>Agility</span><span class="val">${dribbling.agility ?? 88}</span></div>
-                  <div class="attr-item"><span>Reactions</span><span class="val">${dribbling.reactions ?? 95}</span></div>
+                  <div class="attr-header"><span class="attr-title">Dribbling</span><span class="attr-score">${getVal(dr.total, 89)}</span></div>
+                  <div class="attr-item"><span>Dribbling</span><span class="val">${getVal(dr.dribbling, 82)}</span></div>
+                  <div class="attr-item"><span>Ball Control</span><span class="val">${getVal(dr.ballControl, 93)}</span></div>
+                  <div class="attr-item"><span>Agility</span><span class="val">${getVal(dr.agility, 88)}</span></div>
+                  <div class="attr-item"><span>Reactions</span><span class="val">${getVal(dr.reactions, 95)}</span></div>
                 </div>
 
                 <div class="attr-box">
-                  <div class="attr-header"><span class="attr-title">Defending</span><span class="attr-score">${defending.total ?? 105}</span></div>
-                  <div class="attr-item"><span>Marking</span><span class="val">${defending.marking ?? 107}</span></div>
-                  <div class="attr-item"><span>Standing Tackle</span><span class="val">${defending.standingTackle ?? 108}</span></div>
-                  <div class="attr-item"><span>Sliding Tackle</span><span class="val">${defending.slidingTackle ?? 100}</span></div>
-                  <div class="attr-item"><span>Awareness</span><span class="val">${defending.awareness ?? 107}</span></div>
+                  <div class="attr-header"><span class="attr-title">Defending</span><span class="attr-score">${getVal(def.total, 105)}</span></div>
+                  <div class="attr-item"><span>Marking</span><span class="val">${getVal(def.marking, 107)}</span></div>
+                  <div class="attr-item"><span>Standing Tackle</span><span class="val">${getVal(def.standingTackle, 108)}</span></div>
+                  <div class="attr-item"><span>Sliding Tackle</span><span class="val">${getVal(def.slidingTackle, 100)}</span></div>
+                  <div class="attr-item"><span>Awareness</span><span class="val">${getVal(def.awareness, 107)}</span></div>
                 </div>
 
                 <div class="attr-box">
-                  <div class="attr-header"><span class="attr-title">Physical</span><span class="attr-score">${physical.total ?? 106}</span></div>
-                  <div class="attr-item"><span>Strength</span><span class="val">${physical.strength ?? 107}</span></div>
-                  <div class="attr-item"><span>Aggression</span><span class="val">${physical.aggression ?? 100}</span></div>
-                  <div class="attr-item"><span>Jumping</span><span class="val">${physical.jumping ?? 114}</span></div>
+                  <div class="attr-header"><span class="attr-title">Physical</span><span class="attr-score">${getVal(phy.total, 106)}</span></div>
+                  <div class="attr-item"><span>Strength</span><span class="val">${getVal(phy.strength, 107)}</span></div>
+                  <div class="attr-item"><span>Aggression</span><span class="val">${getVal(phy.aggression, 100)}</span></div>
+                  <div class="attr-item"><span>Jumping</span><span class="val">${getVal(phy.jumping, 114)}</span></div>
                 </div>
               </div>
 
@@ -646,19 +636,14 @@
           };
 
           db.collection("students").doc(String(code)).set(studentData, { merge: true })
-            .then(() => {
-              closeModal();
-            })
-            .catch((err) => {
-              alert("ডাটা সেভ করতে সমস্য হয়েছে: " + err.message);
-            });
+            .then(() => closeModal())
+            .catch((err) => alert("ডাটা সেভ করতে সমস্য হয়েছে: " + err.message));
         });
       };
 
       const closeModal = () => { studentModal.style.display = "none"; };
 
       const openModal = () => {
-        isEditMode = false;
         document.getElementById("modalTitle").innerText = "নতুন তথ্য যোগ করুন";
         studentForm.reset();
         document.getElementById("formRoll").disabled = false;
@@ -666,7 +651,6 @@
       };
 
       const editStudent = (roll) => {
-        isEditMode = true;
         const student = students.find(s => String(s.roll) === String(roll));
         if (!student) return;
 
