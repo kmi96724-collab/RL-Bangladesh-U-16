@@ -411,7 +411,6 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    // 🔴 মান শূন্য (0) বা খালি থাকলে এটি স্বয়ংক্রিয়ভাবে ছবির আসল মানগুলো ব্যবহার করবে
     const parseStat = (val, defaultValue) => {
       if (val === undefined || val === null || val === 0 || val === '0' || val === '') {
         return defaultValue;
@@ -421,6 +420,7 @@
 
     const App = (() => {
       let students = [];
+      let isDataLoaded = false;
       let currentUser = JSON.parse(localStorage.getItem('redlock_user')) || null;
 
       const authSection = document.getElementById("authSection");
@@ -442,6 +442,8 @@
             students.push(doc.data());
           });
           
+          isDataLoaded = true;
+
           if (currentUser) {
             renderCards(students);
           }
@@ -568,6 +570,12 @@
       const bindEvents = () => {
         loginForm.addEventListener("submit", (e) => {
           e.preventDefault();
+          
+          if (!isDataLoaded) {
+            alert("ফায়ারবেস ডাটা এখনো লোড হচ্ছে, কিছুক্ষণ পর আবার চেষ্টা করুন!");
+            return;
+          }
+
           const role = document.getElementById("loginRole").value;
           const id = document.getElementById("loginId").value.trim();
           const pass = document.getElementById("loginPass").value;
@@ -579,14 +587,14 @@
 
           if (role === "admin") {
             if (id.toLowerCase() !== "admin") {
-              alert("সঠিক আইডি লিখুন");
+              alert("সঠিক এডমিন আইডি লিখুন (admin)");
               return;
             }
             currentUser = { role: "admin", name: "Administrator", roll: "admin" };
           } else {
             const student = students.find(s => String(s.roll) === id);
             if (!student) {
-              alert("এই কোড নম্বর দিয়ে কোনো প্লেয়ার এর নাম পাওয়া যায়নি!");
+              alert("এই কোড নম্বর দিয়ে কোনো প্লেয়ার এর নাম পাওয়া যায়নি!");
               return;
             }
             currentUser = { role: "user", name: student.name, roll: student.roll };
@@ -599,7 +607,7 @@
         searchInput.addEventListener("input", () => {
           const query = searchInput.value.trim().toLowerCase();
           const filtered = students.filter(s =>
-            (s.name && s.name.toLowerCase().includes(query)) || String(s.roll).includes(query)
+            (s.name && s.name.toLowerCase().includes(query)) || String(s.roll).toLowerCase().includes(query)
           );
           renderCards(filtered);
         });
@@ -618,7 +626,6 @@
           const dept = document.getElementById("formDept").value.trim();
           const phone = document.getElementById("formPhone").value.trim();
 
-          // ডাটা সেভ করার সময় আসল মানগুলোসহ ডাটাবেসে সেভ হবে
           const studentData = {
             roll: code,
             name,
