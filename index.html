@@ -412,15 +412,24 @@
     const db = firebase.firestore();
 
     const parseStat = (val, defaultValue) => {
-      if (val === undefined || val === null || val === 0 || val === '0' || val === '') {
+      if (val === undefined || val === null || val === '') {
         return defaultValue;
       }
       return val;
     };
 
+    // Prevent database/user-entered text from being interpreted as HTML.
+    const escapeHtml = (value) => String(value ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+
     const App = (() => {
       let students = [];
       let isDataLoaded = false;
+      let editingStudent = null;
       let currentUser = JSON.parse(localStorage.getItem('redlock_user')) || null;
 
       const authSection = document.getElementById("authSection");
@@ -473,18 +482,18 @@
               <div class="fc-header">
                 <div class="fut-badge">
                   <div class="fut-ovr">${parseStat(s.ovr, 85)}</div>
-                  <div class="fut-pos">${s.pos || 'CB'}</div>
+                  <div class="fut-pos">${escapeHtml(s.pos || 'CB')}</div>
                 </div>
                 <div class="player-details">
-                  <h2>${s.name || 'N/A'}</h2>
+                  <h2>${escapeHtml(s.name || 'N/A')}</h2>
                   <div class="player-meta">
-                    <span>Code No.: <strong>${s.roll || 'N/A'}</strong></span>
-                    <span>Class: <strong>${s.class || 'N/A'} (${s.section || ''})</strong></span>
-                    <span>Department: <strong>${s.dept || 'N/A'}</strong></span>
-                    <span>Age: <strong>${s.age || 'N/A'}</strong></span>
-                    <span>Date of Birth: <strong>${s.dob || 'N/A'}</strong></span>
-                    <span>Strong Foot: <strong>${s.strongFoot || 'N/A'}</strong></span>
-                    <span>Mobile: <strong>${s.phone || 'N/A'}</strong></span>
+                    <span>Code No.: <strong>${escapeHtml(s.roll || 'N/A')}</strong></span>
+                    <span>Class: <strong>${escapeHtml(s.class || 'N/A')} (${escapeHtml(s.section || '')})</strong></span>
+                    <span>Department: <strong>${escapeHtml(s.dept || 'N/A')}</strong></span>
+                    <span>Age: <strong>${escapeHtml(s.age || 'N/A')}</strong></span>
+                    <span>Date of Birth: <strong>${escapeHtml(s.dob || 'N/A')}</strong></span>
+                    <span>Strong Foot: <strong>${escapeHtml(s.strongFoot || 'N/A')}</strong></span>
+                    <span>Mobile: <strong>${escapeHtml(s.phone || 'N/A')}</strong></span>
                   </div>
                 </div>
               </div>
@@ -605,6 +614,7 @@
         });
 
         searchInput.addEventListener("input", () => {
+          if (!isDataLoaded) return;
           const query = searchInput.value.trim().toLowerCase();
           const filtered = students.filter(s =>
             (s.name && s.name.toLowerCase().includes(query)) || String(s.roll).toLowerCase().includes(query)
@@ -614,6 +624,11 @@
 
         studentForm.addEventListener("submit", (e) => {
           e.preventDefault();
+
+          if (!currentUser || currentUser.role !== 'admin') {
+            alert("শুধুমাত্র এডমিন এই তথ্য পরিবর্তন করতে পারবেন!");
+            return;
+          }
           const code = document.getElementById("formRoll").value.trim();
           const name = document.getElementById("formName").value.trim();
           const dob = document.getElementById("formDob").value.trim();
@@ -638,7 +653,7 @@
             section,
             dept,
             phone,
-            stats: {
+            stats: editingStudent?.stats || {
               pace: { total: 91, acc: 94, speed: 89 },
               shooting: { total: 63, finish: 53, longShot: 72, shotPow: 86, positioning: 58, volley: 55, penalties: 42 },
               passing: { total: 78, shortPass: 90, longPass: 89, vision: 77, crossing: 60, curve: 57, freeKick: 52 },
@@ -648,25 +663,40 @@
             }
           };
 
+          if (!editingStudent && students.some(s => String(s.roll) === String(code))) {
+            alert("এই Code No. ইতোমধ্যে আছে!");
+            return;
+          }
+
           db.collection("students").doc(String(code)).set(studentData, { merge: true })
             .then(() => closeModal())
             .catch((err) => alert("ডাটা সেভ করতে সমস্যা হয়েছে: " + err.message));
         });
       };
 
-      const closeModal = () => { studentModal.style.display = "none"; };
+      const closeModal = () => { studentModal.style.display = "none"; editingStudent = null; };
 
       const openModal = () => {
+        if (!currentUser || currentUser.role !== 'admin') {
+          alert("শুধুমাত্র এডমিন নতুন তথ্য যোগ করতে পারবেন!");
+          return;
+        }
         document.getElementById("modalTitle").innerText = "নতুন তথ্য যোগ করুন";
         studentForm.reset();
+        editingStudent = null;
         document.getElementById("formRoll").disabled = false;
         studentModal.style.display = "flex";
       };
 
       const editStudent = (roll) => {
+        if (!currentUser || currentUser.role !== 'admin') {
+          alert("শুধুমাত্র এডমিন তথ্য এডিট করতে পারবেন!");
+          return;
+        }
         const student = students.find(s => String(s.roll) === String(roll));
         if (!student) return;
 
+        editingStudent = student;
         document.getElementById("modalTitle").innerText = "তথ্য এডিট করুন";
         document.getElementById("formRoll").value = student.roll || '';
         document.getElementById("formRoll").disabled = true;
@@ -685,6 +715,10 @@
       };
 
       const deleteStudent = (roll) => {
+        if (!currentUser || currentUser.role !== 'admin') {
+          alert("শুধুমাত্র এডমিন তথ্য মুছতে পারবেন!");
+          return;
+        }
         if (confirm("আপনি কি নিশ্চিত যে এই তথ্যটি মুছে ফেলবেন?")) {
           db.collection("students").doc(String(roll)).delete()
             .catch((err) => alert("ডিলিট করার সময় সমস্যা হয়েছে: " + err.message));
